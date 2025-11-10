@@ -22,8 +22,18 @@ func main() {
 		}
 	}).Methods("GET")
 
-	err := http.ListenAndServe(":8080", r)
-	if err != nil {
+	r.HandleFunc("/hello/{name}", func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+		name := vars["name"]
+		response := Response{Message: "Hola: " + name}
+		w.Header().Set("Content-Type", "application/json")
+		if err := json.NewEncoder(w).Encode(response); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+	}).Methods("GET")
+
+	if err := http.ListenAndServe(":8080", r); err != nil {
 		return
 	}
 }
